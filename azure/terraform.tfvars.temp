@@ -13,20 +13,20 @@
 # limitations under the License.
 
 # ------- Global settings -------
-env_prefix = "<ENTER_VALUE>" # Required name prefix for cloud and CDP resources, e.g. cldr1
+env_prefix = "${CLUSTER_NAME}" # Required name prefix for cloud and CDP resources, e.g. cldr1
 
 # ------- Cloud Settings -------
-azure_region = "<ENTER_VALUE>" # Change this to specify Cloud Provider region, e.g. eastus
+azure_region = "${AZ_REGION}" # Change this to specify Cloud Provider region, e.g. eastus
 
-public_key_text = "<ENTER_VALUE>" # Change this with the SSH public key text, e.g. ssh-rsa AAA....
+public_key_text = "${SSH_USER_KEY}" # Change this with the SSH public key text, e.g. ssh-rsa AAA....
 
 # ------- CDP Environment Deployment -------
-deployment_template = "<ENTER_VALUE>"  # Specify the deployment pattern below. Options are public, semi-private or private
+deployment_template = "${DEPLOYMENT_TYPE}"  # Specify the deployment pattern below. Options are public, semi-private or private
 
 # ------- Network Settings -------
 # **NOTE: If required change the values below any additional CIDRs to add the the AWS Security Groups**
 ingress_extra_cidrs_and_ports = {
- cidrs = ["<ENTER_IP_VALUE>/32", "<ENTER_IP_VALUE>/32"],
+ cidrs = [${WHITELIST_IP}],
  ports = [443, 22]
 }
 
