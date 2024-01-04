@@ -20,8 +20,8 @@
 echo "Starting CDP TF Quickstarts" 
 
 # Required
-export CLUSTER_NAME=""
-export WHITELIST_IP=""
+export ENV_NAME=""
+export WHITELIST_IPS=""
 export CLOUD_PROVIDER=""
 
 ## For Azure
@@ -56,8 +56,8 @@ function usage()
     echo "./setup-cluster.sh"
     echo "  -h --help"
     echo "  --cluster-name=$CLUSTER_NAME Required as it will be the name of the cluster (Default) "
-    echo "  --whitelist-ip=$WHITELIST_IP Required to access the cluster (Default) "
-    echo "  --cloud-provider=$CLOUD_PROVIDER Required to know on which cloud to deploy, either: aws, az or gcp (Default) "
+    echo "  --whitelist-ips=$WHITELIST_IPS Required to access the cluster (Default) "
+    echo "  --cloud-provider=$CLOUD_PROVIDER Required to know on which cloud to deploy, either: aws, azure or gcp (Default) "
     echo ""
     echo " Required for Azure: "
     echo "  --arm-client-id=$AZ_ARM_CLIENT_ID Required to create machines (Default) "
@@ -90,8 +90,8 @@ while [ "$1" != "" ]; do
         --cluster-name)
             CLUSTER_NAME=$VALUE
             ;;    
-        --whitelist-ip)
-            WHITELIST_IP=$VALUE
+        --whitelist-ips)
+            WHITELIST_IPS=$VALUE
             ;;
         --cloud-provider)
             CLOUD_PROVIDER=$VALUE
@@ -151,7 +151,7 @@ case $CLOUD_PROVIDER in
     aws)
         cp -Rp aws/* ${WORK_DIR}/
         ;; 
-    az)
+    azure)
         cp -Rp azure/* ${WORK_DIR}/
         ;;
     gcp)
@@ -162,6 +162,14 @@ case $CLOUD_PROVIDER in
 esac
 cd ${WORK_DIR}
 
+# Split WHITELIST_IP
+export WHIP_UNIQ=$( echo ${WHITELIST_IPS} | uniq )
+export WHIP_ARRAY=( ${WHIP_UNIQ} )
+export WHITELIST_IP=""
+for ip in "${WHIP_ARRAY[@]}"; do
+    WHITELIST_IP+="\"$ip/32\","
+done
+WHITELIST_IP=${WHITELIST_IP%,}
 
 if [ "${ACTION}" == "create" ]
 then

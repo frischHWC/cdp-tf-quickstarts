@@ -25,7 +25,7 @@ deployment_template = "${DEPLOYMENT_TYPE}"  # Specify the deployment pattern bel
 # ------- Network Settings -------
 # **NOTE: If required change the values below any additional CIDRs to add the the AWS Security Groups**
 ingress_extra_cidrs_and_ports = {
- cidrs = ["${WHITELIST_IP}/32"],
+ cidrs = [${WHITELIST_IP}],
  ports = [443, 22]
 }
 
