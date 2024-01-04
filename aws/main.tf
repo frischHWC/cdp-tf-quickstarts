@@ -13,12 +13,11 @@
 # limitations under the License.
 
 provider "aws" {
-  profile = var.aws_profile
-  region  = var.aws_region
+  region = var.aws_region
 }
 
 module "cdp_aws_prereqs" {
-  source = "git::https://github.com/cloudera-labs/terraform-cdp-modules.git//modules/terraform-cdp-aws-pre-reqs?ref=v0.4.0"
+  source = "git::https://github.com/cloudera-labs/terraform-cdp-modules.git//modules/terraform-cdp-aws-pre-reqs?ref=v0.5.0"
 
   env_prefix = var.env_prefix
   aws_region = var.aws_region
@@ -42,7 +41,7 @@ module "cdp_aws_prereqs" {
 }
 
 module "cdp_deploy" {
-  source = "git::https://github.com/cloudera-labs/terraform-cdp-modules.git//modules/terraform-cdp-deploy?ref=v0.4.0"
+  source = "git::https://github.com/cloudera-labs/terraform-cdp-modules.git//modules/terraform-cdp-deploy?ref=v0.5.0"
 
   env_prefix          = var.env_prefix
   infra_type          = "aws"
@@ -79,7 +78,7 @@ terraform {
   required_providers {
     cdp = {
       source  = "cloudera/cdp"
-      version = "0.2.0"
+      version = "0.4.0"
     }
   }
 }
