@@ -72,7 +72,7 @@ function usage()
     echo "  --aws-key-pair=$AWS_KEY_PAIR Required to access the cluster (Default) "
     echo ""
     echo " Optional: "
-    echo "  --action=$ACTION Required to know what to do, to choose between: create, start, stop or delete (Default) create"
+    echo "  --action=$ACTION Required to know what to do, to choose between: create or delete (Default) create"
     echo "  --deployment-type=$DEPLOYMENT_TYPE Deployment type between: public, private or semi-private (Default) $DEPLOYMENT_TYPE "
     echo "  --aws-region=$AWS_REGION (Default) $AWS_REGION "
     echo "  --az-region=$AZ_REGION (Default) $AZ_REGION "
@@ -183,18 +183,8 @@ if [ "${ACTION}" == "delete" ]
 then
     echo "Deleting cluster"
     terraform destroy -auto-approve
-fi
-
-# TODO: Stop a DL
-if [ "${ACTION}" == "stop" ]
-then
-    echo "Stopping DataLake"
-fi
-
-# TODO: Start a DL
-if [ "${ACTION}" == "start" ]
-then
-    echo "Starting DataLake"
+    echo "To finish deletion, run manually: "
+    echo "      rm -rf $pwd "
 fi
 
 cd ../
