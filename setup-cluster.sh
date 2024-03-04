@@ -184,7 +184,7 @@ then
     echo "Deleting cluster"
     terraform destroy -auto-approve
     echo "To finish deletion, run manually: "
-    echo "      rm -rf $pwd "
+    echo "      rm -rf $(pwd) "
 fi
 
 cd ../
