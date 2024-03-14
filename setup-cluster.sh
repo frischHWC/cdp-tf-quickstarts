@@ -17,8 +17,6 @@
 # under the License.
 #
 #!/bin/bash
-echo "Starting CDP TF Quickstarts" 
-
 # Required
 export ENV_NAME=""
 export WHITELIST_IPS=""
@@ -36,6 +34,9 @@ export AWS_AWS_ACCESS_KEY_ID=""
 export AWS_AWS_SECRET_ACCESS_KEY=""
 export AWS_KEY_PAIR=""
 
+## For GCP
+export GCP_PROJECT_ID=
+
 # Optional 
 export ACTION="create"
 export DEPLOYMENT_TYPE="public"
@@ -45,6 +46,9 @@ export AWS_REGION="eu-west-3"
 
 ## For Azure
 export AZ_REGION="eastus"
+
+## For GCP
+export GCP_REGION="europe-west-2"
 
 
 function usage()
@@ -71,11 +75,16 @@ function usage()
     echo "  --aws-access-key-secret=$AWS_AWS_SECRET_ACCESS_KEY Required to create machines (Default) "
     echo "  --aws-key-pair=$AWS_KEY_PAIR Required to access the cluster (Default) "
     echo ""
+    echo " Required for GCP: "
+    echo "  --gcp-project-id=$GCP_PROJECT_ID Required to create machines (Default) "
+    echo "  --ssh-user-key=$SSH_USER_KEY Required to acces the cluster (Default) "
+    echo ""
     echo " Optional: "
     echo "  --action=$ACTION Required to know what to do, to choose between: create or delete (Default) create"
     echo "  --deployment-type=$DEPLOYMENT_TYPE Deployment type between: public, private or semi-private (Default) $DEPLOYMENT_TYPE "
     echo "  --aws-region=$AWS_REGION (Default) $AWS_REGION "
     echo "  --az-region=$AZ_REGION (Default) $AZ_REGION "
+    echo "  --gcp-region=$GCP_REGION (Default) $GCP_REGION "
     echo ""
 }
 
@@ -120,6 +129,9 @@ while [ "$1" != "" ]; do
         --aws-key-pair)
             AWS_KEY_PAIR=$VALUE
             ;;
+        --gcp-project-id)
+            GCP_PROJECT_ID=$VALUE
+            ;;
         --action)
             ACTION=$VALUE
             ;;
@@ -132,6 +144,9 @@ while [ "$1" != "" ]; do
         --az-region)
             AZ_REGION=$VALUE
             ;;
+        --gcp-region)
+            GCP_REGION=$VALUE
+            ;;
         --test)
             TEST=$VALUE
             ;;     
@@ -141,7 +156,10 @@ while [ "$1" != "" ]; do
     shift
 done
 
-./logger.sh
+# Load logger
+. ./logger.sh
+
+logger info:cyan "Starting CDP TF Quickstarts"
 
 # TODO: Implement Checks on params passed
 
