@@ -141,6 +141,8 @@ while [ "$1" != "" ]; do
     shift
 done
 
+./logger.sh
+
 # TODO: Implement Checks on params passed
 
 
@@ -173,7 +175,7 @@ WHITELIST_IP=${WHITELIST_IP%,}
 
 if [ "${ACTION}" == "create" ]
 then
-    echo "Creating cluster"
+    logger info "Creating cluster"
     envsubst < terraform.tfvars.temp > terraform.tfvars
     terraform init
     terraform apply -auto-approve
@@ -181,11 +183,11 @@ fi
 
 if [ "${ACTION}" == "delete" ]
 then
-    echo "Deleting cluster"
+    logger warn "Deleting cluster"
     terraform destroy -auto-approve
-    echo "To finish deletion, run manually: "
-    echo "      rm -rf $(pwd) "
+    logger info "To finish deletion, run manually: "
+    logger info "      rm -rf $(pwd) "
 fi
 
 cd ../
-echo "Finished CDP TF Quickstarts" 
+logger success "Finished CDP TF Quickstarts" 

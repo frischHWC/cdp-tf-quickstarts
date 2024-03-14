@@ -13,20 +13,25 @@
 # limitations under the License.
 
 # ------- Global settings -------
-variable "aws_region" {
-  type        = string
-  description = "Region which Cloud resources will be created"
-}
-
 variable "env_prefix" {
   type        = string
   description = "Shorthand name for the environment. Used in resource descriptions"
 }
 
-variable "aws_key_pair" {
+variable "gcp_project" {
+  type        = string
+  description = "Region which Cloud resources will be created"
+}
+
+variable "gcp_region" {
+  type        = string
+  description = "Region which Cloud resources will be created"
+}
+
+variable "public_key_text" {
   type = string
 
-  description = "Name of the Public SSH key for the CDP environment"
+  description = "SSH Public key string for the nodes of the CDP environment"
 
   default = null
 }
@@ -45,7 +50,7 @@ variable "deployment_template" {
   description = "Deployment Pattern to use for Cloud resources and CDP"
 }
 
-# ------- Network Resources -------
+# # ------- Network Resources -------
 variable "ingress_extra_cidrs_and_ports" {
   type = object({
     cidrs = list(string)
@@ -65,32 +70,16 @@ variable "create_vpc" {
   default = true
 }
 
-variable "cdp_vpc_id" {
+variable "cdp_vpc_name" {
   type        = string
-  description = "VPC ID for CDP environment. Required if create_vpc is false."
+  description = "Pre-existing VPC Name for CDP environment. Required if create_vpc is false."
 
   default = null
 }
 
-variable "cdp_public_subnet_ids" {
+variable "cdp_subnet_names" {
   type        = list(any)
-  description = "List of public subnet ids. Required if create_vpc is false."
+  description = "List of subnet names for CDP Resources. Required if create_vpc is false."
 
   default = null
-}
-
-variable "cdp_private_subnet_ids" {
-  type        = list(any)
-  description = "List of private subnet ids. Required if create_vpc is false."
-
-  default = null
-}
-
-# ------- Optional inputs for Control Plane Connectivity in fully private environment -------
-variable "private_network_extensions" {
-  type = bool
-
-  description = "Enable creation of resources for connectivity to CDP Control Plane (public subnet and NAT Gateway) for Private Deployment. Only relevant for private deployment template"
-
-  default = true
 }

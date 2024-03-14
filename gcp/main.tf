@@ -12,36 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-provider "azurerm" {
-  features {
-    resource_group {
-      prevent_deletion_if_contains_resources = false
-    }
-  }
-
+provider "google" {
+  project = var.gcp_project
+  region  = var.gcp_region
 }
 
-provider "azuread" {
-}
 
-module "cdp_azure_prereqs" {
-  source = "git::https://github.com/cloudera-labs/terraform-cdp-modules.git//modules/terraform-cdp-azure-pre-reqs?ref=v0.5.2"
+module "cdp_gcp_prereqs" {
+  source = "git::https://github.com/cloudera-labs/terraform-cdp-modules.git//modules/terraform-cdp-gcp-pre-reqs?ref=v0.5.2"
 
-  env_prefix   = var.env_prefix
-  azure_region = var.azure_region
+  env_prefix = var.env_prefix
+  gcp_region = var.gcp_region
 
-  deployment_template           = var.deployment_template
+  deployment_template = var.deployment_template
+
   ingress_extra_cidrs_and_ports = local.ingress_extra_cidrs_and_ports
 
-  # Inputs for BYO-VNet
-  create_vnet            = var.create_vnet
-  cdp_resourcegroup_name = var.cdp_resourcegroup_name
-  cdp_vnet_name          = var.cdp_vnet_name
-  cdp_subnet_names       = var.cdp_subnet_names
-  cdp_gw_subnet_names    = var.cdp_gw_subnet_names
-
-  # Tags to apply resources (omitted by default)
-  env_tags = var.env_tags
+  # Inputs for BYO-VPC
+  create_vpc       = var.create_vpc
+  cdp_vpc_name     = var.cdp_vpc_name
+  cdp_subnet_names = var.cdp_subnet_names
 
 }
 
@@ -49,41 +39,35 @@ module "cdp_deploy" {
   source = "git::https://github.com/cloudera-labs/terraform-cdp-modules.git//modules/terraform-cdp-deploy?ref=v0.5.2"
 
   env_prefix          = var.env_prefix
-  infra_type          = "azure"
-  region              = var.azure_region
+  infra_type          = "gcp"
+  gcp_project_id      = var.gcp_project
+  region              = var.gcp_region
   public_key_text     = local.public_key_text
   deployment_template = var.deployment_template
 
   # From pre-reqs module output
-  azure_subscription_id = module.cdp_azure_prereqs.azure_subscription_id
-  azure_tenant_id       = module.cdp_azure_prereqs.azure_tenant_id
+  gcp_network_name     = module.cdp_gcp_prereqs.gcp_vpc_name
+  gcp_cdp_subnet_names = module.cdp_gcp_prereqs.gcp_cdp_subnet_names
 
-  azure_resource_group_name      = module.cdp_azure_prereqs.azure_resource_group_name
-  azure_vnet_name                = module.cdp_azure_prereqs.azure_vnet_name
-  azure_cdp_subnet_names         = module.cdp_azure_prereqs.azure_cdp_subnet_names
-  azure_cdp_gateway_subnet_names = module.cdp_azure_prereqs.azure_cdp_gateway_subnet_names
+  gcp_firewall_default_id = module.cdp_gcp_prereqs.gcp_firewall_default_name
+  gcp_firewall_knox_id    = module.cdp_gcp_prereqs.gcp_firewall_knox_name
 
-  azure_security_group_default_uri = module.cdp_azure_prereqs.azure_security_group_default_uri
-  azure_security_group_knox_uri    = module.cdp_azure_prereqs.azure_security_group_knox_uri
+  data_storage_location   = module.cdp_gcp_prereqs.gcp_data_storage_location
+  log_storage_location    = module.cdp_gcp_prereqs.gcp_log_storage_location
+  backup_storage_location = module.cdp_gcp_prereqs.gcp_backup_storage_location
 
-  data_storage_location   = module.cdp_azure_prereqs.azure_data_storage_location
-  log_storage_location    = module.cdp_azure_prereqs.azure_log_storage_location
-  backup_storage_location = module.cdp_azure_prereqs.azure_backup_storage_location
+  gcp_xaccount_service_account_private_key = module.cdp_gcp_prereqs.gcp_xaccount_sa_private_key
 
-  azure_xaccount_app_uuid  = module.cdp_azure_prereqs.azure_xaccount_app_uuid
-  azure_xaccount_app_pword = module.cdp_azure_prereqs.azure_xaccount_app_pword
-
-  azure_idbroker_identity_id      = module.cdp_azure_prereqs.azure_idbroker_identity_id
-  azure_datalakeadmin_identity_id = module.cdp_azure_prereqs.azure_datalakeadmin_identity_id
-  azure_ranger_audit_identity_id  = module.cdp_azure_prereqs.azure_ranger_audit_identity_id
-  azure_log_identity_id           = module.cdp_azure_prereqs.azure_log_identity_id
-  azure_raz_identity_id           = module.cdp_azure_prereqs.azure_raz_identity_id
+  gcp_idbroker_service_account_email       = module.cdp_gcp_prereqs.gcp_idbroker_service_account_email
+  gcp_datalake_admin_service_account_email = module.cdp_gcp_prereqs.gcp_datalake_admin_service_account_email
+  gcp_ranger_audit_service_account_email   = module.cdp_gcp_prereqs.gcp_ranger_audit_service_account_email
+  gcp_log_service_account_email            = module.cdp_gcp_prereqs.gcp_log_service_account_email
 
   # Tags to apply resources (omitted by default)
   env_tags = var.env_tags
 
   depends_on = [
-    module.cdp_azure_prereqs
+    module.cdp_gcp_prereqs
   ]
 }
 
