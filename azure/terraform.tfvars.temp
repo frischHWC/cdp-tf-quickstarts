@@ -1,4 +1,4 @@
-# Copyright 2023 Cloudera, Inc. All Rights Reserved.
+# Copyright 2025 Cloudera, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,12 +23,27 @@ public_key_text = "${SSH_USER_KEY}" # Change this with the SSH public key text, 
 # ------- CDP Environment Deployment -------
 deployment_template = "${DEPLOYMENT_TYPE}"  # Specify the deployment pattern below. Options are public, semi-private or private
 
+
 # ------- Network Settings -------
 # **NOTE: If required change the values below any additional CIDRs to add the the AWS Security Groups**
 ingress_extra_cidrs_and_ports = {
  cidrs = [${WHITELIST_IP}],
  ports = [443, 22]
 }
+
+env_tags = {
+    owner   = "${TAG_USERNAME}"
+}
+
+# ------- Resource Tagging -------
+# **NOTE: An example of how to specify tags is below; uncomment & edit if required
+# env_tags = {
+#     owner   = "<ENTER_VALUE>"
+#     project = "<ENTER_VALUE>"
+#     enddate = "<ENTER_VALUE>"
+# }
+
+
 
 # ------- Optional inputs for BYO-VNet -------
 # **NOTE: Uncomment below settings if required
@@ -38,4 +53,5 @@ ingress_extra_cidrs_and_ports = {
 # cdp_resourcegroup_name="<ENTER_EXISTING_RG_NAME>" # Name of pre-existing Resource Group for CDP environment. Required if create_vnet is false
 # cdp_vnet_name="<ENTER_EXISTING_VNET_NAME>" # Name of pre-existing VNet for CDP environment. Required if create_vnet is false
 # cdp_subnet_names=["<ENTER_EXISTING_SUBNET_NAME>","<ENTER_EXISTING_SUBNET_NAME>"] # List of pre-existing subnet names for CDP resources. Required if create_vnet is false
-# cdp_gw_subnet_names=["<ENTER_EXISTING_SUBNET_NAME>"] # List of pre-existing subnet names for CDP Gateway. Required if create_vnet is false
+# cdp_gw_subnet_names=["<ENTER_EXISTING_SUBNET_NAME>"] # List of pre-existing subnet names for CDP Gateway. Required if create_vnet is false. NOTE: Can be an empty list depending on deployment_template.
+# cdp_delegated_subnet_names=["<ENTER_EXISTING_SUBNET_NAME>"] # List of pre-existing subnet names delegated for Postgres flexible servers. NOTE: Can be an empty list depending on deployment_template.

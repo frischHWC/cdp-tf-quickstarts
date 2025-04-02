@@ -1,4 +1,4 @@
-# Copyright 2023 Cloudera, Inc. All Rights Reserved.
+# Copyright 2025 Cloudera, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,12 +12,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+terraform {
+  required_version = ">= 1.5.7"
+  required_providers {
+    cdp = {
+      source  = "cloudera/cdp"
+      version = ">= 0.6.1"
+    }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~>5.30"
+    }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0.5"
+    }
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.5.1"
+    }
+    http = {
+      source  = "hashicorp/http"
+      version = "~> 3.2.1"
+    }
+  }
+}
 provider "aws" {
   region = var.aws_region
+
+  # ignore tags created by data services
+  ignore_tags {
+    key_prefixes = ["kubernetes.io/cluster"]
+  }
 }
 
 module "cdp_aws_prereqs" {
-  source = "git::https://github.com/cloudera-labs/terraform-cdp-modules.git//modules/terraform-cdp-aws-pre-reqs?ref=v0.5.2"
+  source = "git::https://github.com/cloudera-labs/terraform-cdp-modules.git//modules/terraform-cdp-aws-pre-reqs?ref=v0.10.1"
 
   env_prefix = var.env_prefix
   aws_region = var.aws_region
@@ -26,8 +56,23 @@ module "cdp_aws_prereqs" {
   ingress_extra_cidrs_and_ports = local.ingress_extra_cidrs_and_ports
 
   # Using CDP TF Provider cred pre-reqs data source for values of xaccount account_id and external_id
-  xaccount_account_id  = data.cdp_environments_aws_credential_prerequisites.cdp_prereqs.account_id
-  xaccount_external_id = data.cdp_environments_aws_credential_prerequisites.cdp_prereqs.external_id
+  xaccount_account_id         = data.cdp_environments_aws_credential_prerequisites.cdp_prereqs.account_id
+  xaccount_external_id        = data.cdp_environments_aws_credential_prerequisites.cdp_prereqs.external_id
+  xaccount_account_policy_doc = base64decode(data.cdp_environments_aws_credential_prerequisites.cdp_prereqs.policy)
+
+  # Policy documents from CDP TF Provider cred pre-reqs
+  idbroker_policy_doc = base64decode(data.cdp_environments_aws_credential_prerequisites.cdp_prereqs.policies["Idbroker_Assumer"])
+
+  data_bucket_access_policy_doc   = base64decode(data.cdp_environments_aws_credential_prerequisites.cdp_prereqs.policies["Bucket_Access"])
+  log_bucket_access_policy_doc    = base64decode(data.cdp_environments_aws_credential_prerequisites.cdp_prereqs.policies["Bucket_Access"])
+  backup_bucket_access_policy_doc = base64decode(data.cdp_environments_aws_credential_prerequisites.cdp_prereqs.policies["Bucket_Access"])
+
+  datalake_admin_s3_policy_doc = base64decode(data.cdp_environments_aws_credential_prerequisites.cdp_prereqs.policies["Datalake_Admin"])
+  datalake_backup_policy_doc   = base64decode(data.cdp_environments_aws_credential_prerequisites.cdp_prereqs.policies["Datalake_Backup"])
+  datalake_restore_policy_doc  = base64decode(data.cdp_environments_aws_credential_prerequisites.cdp_prereqs.policies["Datalake_Restore"])
+
+  log_data_access_policy_doc = base64decode(data.cdp_environments_aws_credential_prerequisites.cdp_prereqs.policies["Log_Policy"])
+  ranger_audit_s3_policy_doc = base64decode(data.cdp_environments_aws_credential_prerequisites.cdp_prereqs.policies["Ranger_Audit"])
 
   # Inputs for BYO-VPC
   create_vpc             = var.create_vpc
@@ -37,19 +82,30 @@ module "cdp_aws_prereqs" {
 
   # Inputs for Control Plane Connectivity in fully private 
   private_network_extensions = var.private_network_extensions
+  # Flag to control creation of vpc_endpoints variable
+  create_vpc_endpoints = var.create_vpc_endpoints
 
   # Tags to apply resources (omitted by default)
   env_tags = var.env_tags
 }
 
 module "cdp_deploy" {
-  source = "git::https://github.com/cloudera-labs/terraform-cdp-modules.git//modules/terraform-cdp-deploy?ref=v0.5.2"
+  source = "git::https://github.com/cloudera-labs/terraform-cdp-modules.git//modules/terraform-cdp-deploy?ref=v0.10.1"
 
   env_prefix          = var.env_prefix
   infra_type          = "aws"
   region              = var.aws_region
   keypair_name        = local.aws_key_pair
   deployment_template = var.deployment_template
+  datalake_scale      = var.datalake_scale
+  datalake_version    = var.datalake_version
+  enable_raz          = var.enable_raz
+  datalake_recipes    = var.datalake_recipes
+  freeipa_recipes     = var.freeipa_recipes
+  cdp_groups          = local.cdp_groups
+
+  environment_async_creation = var.environment_async_creation
+  datalake_async_creation    = var.datalake_async_creation
 
   # From pre-reqs module output
   aws_vpc_id             = module.cdp_aws_prereqs.aws_vpc_id
@@ -66,6 +122,7 @@ module "cdp_deploy" {
   aws_xaccount_role_arn       = module.cdp_aws_prereqs.aws_xaccount_role_arn
   aws_datalake_admin_role_arn = module.cdp_aws_prereqs.aws_datalake_admin_role_arn
   aws_ranger_audit_role_arn   = module.cdp_aws_prereqs.aws_ranger_audit_role_arn
+  aws_raz_role_arn            = module.cdp_aws_prereqs.aws_datalake_admin_role_arn
 
   aws_log_instance_profile_arn      = module.cdp_aws_prereqs.aws_log_instance_profile_arn
   aws_idbroker_instance_profile_arn = module.cdp_aws_prereqs.aws_idbroker_instance_profile_arn
@@ -78,15 +135,7 @@ module "cdp_deploy" {
   ]
 }
 
-# Use the CDP Terraform Provider to find the xaccount account and external ids
-terraform {
-  required_providers {
-    cdp = {
-      source  = "cloudera/cdp"
-      version = "0.4.2"
-    }
-  }
-}
+# Use the CDP Terraform Provider to find the xaccount account, external ids and policy contents
 data "cdp_environments_aws_credential_prerequisites" "cdp_prereqs" {}
 
 
@@ -148,4 +197,21 @@ data "http" "my_ip" {
   count = local.lookup_ip ? 1 : 0
 
   url = "https://ipv4.icanhazip.com"
+}
+
+# ------- Create default admin and user CDP group if input cdp_group variable is not specified
+locals {
+  # flag to determine if keypair should be created
+  cdp_groups = var.cdp_groups != null ? var.cdp_groups : toset([
+    {
+      name                   = "${var.env_prefix}-aw-cdp-admin-group"
+      create_group           = true
+      add_id_broker_mappings = true
+    },
+    {
+      name                   = "${var.env_prefix}-aw-cdp-user-group"
+      create_group           = true
+      add_id_broker_mappings = true
+    }
+  ])
 }
