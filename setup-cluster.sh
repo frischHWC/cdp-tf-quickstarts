@@ -40,6 +40,8 @@ export GCP_PROJECT_ID=
 # Optional 
 export ACTION="create"
 export DEPLOYMENT_TYPE="public"
+export TAG="true"
+export TAG_USERNAME=$(whoami)
 
 ## For AWS
 export AWS_REGION="eu-west-3"
@@ -85,6 +87,8 @@ function usage()
     echo "  --aws-region=$AWS_REGION (Default) $AWS_REGION "
     echo "  --az-region=$AZ_REGION (Default) $AZ_REGION "
     echo "  --gcp-region=$GCP_REGION (Default) $GCP_REGION "
+    echo "  --tag=$TAG To tag resources created or not (Default) $TAG "
+    echo "  --tag-username=$TAG_USERNAME Username set as owner of resources in tag (Default) $TAG_USERNAME "
     echo ""
 }
 
@@ -146,6 +150,12 @@ while [ "$1" != "" ]; do
             ;;
         --gcp-region)
             GCP_REGION=$VALUE
+            ;;
+        --tag)
+            TAG=$VALUE
+            ;;
+        --tag-username)
+            TAG_USERNAME=$VALUE
             ;;
         --test)
             TEST=$VALUE

@@ -31,6 +31,7 @@ ingress_extra_cidrs_and_ports = {
 
 env_tags = {
     owner   = "${TAG_USERNAME}"
+    project = "cdp-tf-${CLUSTER_NAME}"
 }
 
 # ------- Resource Tagging -------
