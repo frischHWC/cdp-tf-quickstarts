@@ -214,7 +214,7 @@ then
     logger warn "Deleting cluster"
     terraform destroy -auto-approve
     logger info "To finish deletion, run manually: "
-    logger info "      rm -rf $(pwd) "
+    logger info "      #bold rm -rf $(pwd) #end_bold"
 fi
 
 cd ../

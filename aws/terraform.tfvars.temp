@@ -21,6 +21,7 @@ aws_key_pair = "${AWS_KEY_PAIR}" # Change this with the name of a pre-existing A
 
 # ------- CDP Environment Deployment -------
 deployment_template = "${DEPLOYMENT_TYPE}"  # Specify the deployment pattern below. Options are public, semi-private or private
+datalake_scale = "LIGHT_DUTY"
 
 # ------- Network Settings -------
 # **NOTE: If required change the values below any additional CIDRs to add the the AWS Security Groups**
