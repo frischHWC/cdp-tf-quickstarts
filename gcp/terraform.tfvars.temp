@@ -37,6 +37,8 @@ env_tags = {
     project = "cdp-tf-${CLUSTER_NAME}"
 }
 
+# For versions
+# datalake_version = "7.2.18"
 
 # ------- Resource Tagging -------
 # **NOTE: An example of how to specify tags is below; uncomment & edit if required
