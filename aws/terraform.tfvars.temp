@@ -35,9 +35,6 @@ env_tags = {
     project = "cdp-tf-${CLUSTER_NAME}"
 }
 
-# For versions
-# datalake_version = "7.2.18"
-
 # ------- Resource Tagging -------
 # **NOTE: An example of how to specify tags is below; uncomment & edit if required
 # env_tags = {
@@ -57,3 +54,20 @@ env_tags = {
 
 # ------- Optional inputs for Control Plane Connectivity in fully private environment -------
 # private_network_extensions=true # Set to false if external networking connectivity to CDP Control Plane exists
+
+
+# ------- Optional inputs for Datalake Image -------
+# Specify the datalake image to use, e.g. 
+# datalake_version = "7.2.18"
+# datalake_image = {
+#     id  =  "<ENTER_DATALAKE_IMAGE_ID>"
+# }
+ 
+# ------- Optional inputs for Compute Cluster -------
+# Set to true to enable creation of the default compute cluster
+compute_cluster_enabled = true 
+
+compute_cluster_configuration = {
+    kube_api_authorized_ip_ranges = [${WHITELIST_IP}]
+  }
+  

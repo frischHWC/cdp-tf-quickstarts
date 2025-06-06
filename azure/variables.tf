@@ -179,6 +179,27 @@ variable "cdp_groups" {
   default = null
 }
 
+variable "compute_cluster_enabled" {
+  type = bool
+
+  description = "Enable externalized compute cluster for the environment"
+
+  default = false
+}
+
+variable "compute_cluster_configuration" {
+  type = object({
+    kube_api_authorized_ip_ranges = optional(set(string))
+    outbound_type                 = optional(string)
+    private_cluster               = optional(bool)
+    worker_node_subnets           = optional(set(string))
+  })
+
+  description = "Kubernetes configuration for the externalized compute cluster"
+
+  default = null
+}
+
 # ------- Network Resources -------
 variable "ingress_extra_cidrs_and_ports" {
   type = object({
@@ -232,4 +253,14 @@ variable "cdp_delegated_subnet_names" {
   description = "List of subnet names delegated for Flexible Servers. Required if create_vnet is false."
 
   default = null
+}
+
+variable "datalake_image" {
+  type = object({
+    id           = optional(string)
+    catalog_name = optional(string)
+    os           = optional(string)
+  })
+  description = "The image to use for the datalake. Can only be used when 'datalake_version' is null."
+  default     = null
 }
