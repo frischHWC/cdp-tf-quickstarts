@@ -17,7 +17,7 @@ terraform {
   required_providers {
     cdp = {
       source  = "cloudera/cdp"
-      version = "= 0.11.0"
+      version = "= 0.9.0"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -95,7 +95,7 @@ module "cdp_deploy" {
   cdp_groups          = local.cdp_groups
 
   compute_cluster_enabled       = var.compute_cluster_enabled
-  compute_cluster_configuration = var.compute_cluster_configuration
+  compute_cluster_configuration = local.compute_cluster_configuration
 
   environment_async_creation = var.environment_async_creation
   datalake_async_creation    = var.datalake_async_creation
@@ -204,4 +204,12 @@ locals {
       add_id_broker_mappings = true
     }
   ])
+}
+
+# ------- Create compute cluster with proper configuration
+locals {
+  compute_cluster_configuration = {
+    kube_api_authorized_ip_ranges = var.ingress_extra_cidrs_and_ports.cidrs
+    worker_node_subnets           = module.cdp_azure_prereqs.azure_cdp_subnet_names
+  }
 }

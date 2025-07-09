@@ -17,7 +17,7 @@ terraform {
   required_providers {
     cdp = {
       source  = "cloudera/cdp"
-      version = "= 0.11.0"
+      version = "= 0.9.0"
     }
     google = {
       source  = "hashicorp/google"
